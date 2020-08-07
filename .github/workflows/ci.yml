@@ -28,13 +28,13 @@ jobs:
         uses: actions/checkout@v2.3.1
       -
         name: Set up QEMU
-        uses: docker/action/setup-qemu@mono-action
+        uses: docker/build-push-action/setup-qemu@mono-action
         with:
           qemu-version: ${{ matrix.qemu-version }}
       -
         name: Set up Docker Buildx
         id: buildx
-        uses: docker/action/setup-buildx@mono-action
+        uses: docker/build-push-action/setup-buildx@mono-action
         with:
           buildx-version: ${{ matrix.buildx-version }}
       -
