@@ -13,16 +13,10 @@ jobs:
         buildx-version:
           - latest
           - v0.2.2
-        qemu-version:
-          - latest
-          - 4.2.0-7
+        qemu-platforms:
+          - all
+          - arm64,riscv64,arm
     steps:
-      -
-        name: Runner info
-        run: |
-          sudo apt-get install -y hwinfo
-          sudo hwinfo --short
-          sudo mount
       -
         name: Checkout
         uses: actions/checkout@v2.3.1
@@ -30,7 +24,7 @@ jobs:
         name: Set up QEMU
         uses: docker/build-push-action/setup-qemu@mono-action
         with:
-          qemu-version: ${{ matrix.qemu-version }}
+          platforms: ${{ matrix.qemu-version }}
       -
         name: Set up Docker Buildx
         id: buildx
