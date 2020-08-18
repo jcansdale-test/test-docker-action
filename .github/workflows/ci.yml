@@ -11,40 +11,35 @@ jobs:
       fail-fast: false
       matrix:
         buildx-version:
+          - ""
           - latest
-          - v0.2.2
-        qemu-platforms:
-          - all
-          - arm64,riscv64,arm
     steps:
       -
         name: Checkout
         uses: actions/checkout@v2.3.1
       -
         name: Set up QEMU
-        uses: docker/build-push-action/setup-qemu@mono-action
+        uses: docker/build-push-action/setup-qemu@v2-working-branch
         with:
-          platforms: ${{ matrix.qemu-version }}
+          platforms: all
       -
         name: Set up Docker Buildx
         id: buildx
-        uses: docker/build-push-action/setup-buildx@mono-action
+        uses: docker/build-push-action/setup-buildx@v2-working-branch
         with:
-          buildx-version: ${{ matrix.buildx-version }}
+          version: ${{ matrix.buildx-version }}
       -
         name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
       -
-        name: Run Buildx
-        run: |
-          docker buildx build \
-            --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x \
-            --output "type=image,push=false" \
-            --file ./Dockerfile .
-      -
-        name: Run Buildx (sudo)
-        run: |
-          docker buildx build \
-            --platform linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x \
-            --output "type=image,push=false" \
-            --file ./Dockerfile-sudo .
+        name: Build
+        uses: docker/build-push-action@v2-build-push
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ./Dockerfile
+          platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x
+          push: false
+          tags: |
+            name/app:latest
+            name/app:1.0.0
