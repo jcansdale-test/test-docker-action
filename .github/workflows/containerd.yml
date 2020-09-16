@@ -43,9 +43,6 @@ jobs:
         run: |
           curl -L --output /tmp/containerd-${CONTAINERD_VERSION}-linux-amd64.tar.gz https://github.com/containerd/containerd/releases/download/v${CONTAINERD_VERSION}/containerd-${CONTAINERD_VERSION}-linux-amd64.tar.gz
           sudo sh -c "tar -xvz -f /tmp/containerd-${CONTAINERD_VERSION}-linux-amd64.tar.gz -C /usr/local/ && mkdir -p /etc/containerd/ && containerd config default > /etc/containerd/config.toml was && chmod +x /usr/local/bin/containerd* /usr/local/bin/ctr"
-      -
-        name: Start Containerd
-        run: |
           sudo containerd &> /tmp/containerd.log &
       -
         name: Build image
@@ -58,7 +55,12 @@ jobs:
       -
         name: Import image in Containerd
         run: |
-          sudo ctr --debug images import --base-name ${{ steps.prep.outputs.docker_image }} --digests --all-platforms /tmp/image.tar
+          sudo ctr --debug image import --base-name ${{ steps.prep.outputs.docker_image }} --digests --all-platforms /tmp/image.tar
+          sudo ctr image ls
+      -
+        name: Push image
+        run: |
+          sudo ctr --debug image push --user "${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}" ${{ steps.prep.outputs.docker_image }}
       -
         name: Output Containerd logs
         if: always()
