@@ -32,6 +32,7 @@ jobs:
             TAGS="$TAGS,${DOCKER_IMAGE}:latest"
           fi
           echo ::set-output name=docker_image::${DOCKER_IMAGE}
+          echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}
       -
         name: Set up Docker Buildx
@@ -56,11 +57,14 @@ jobs:
         name: Import image in Containerd
         run: |
           sudo ctr --debug image import --base-name ${{ steps.prep.outputs.docker_image }} --digests --all-platforms /tmp/image.tar
+      -
+        name: List Containerd images
+        run: |
           sudo ctr image ls
       -
-        name: Push image
+        name: Push image with Containerd
         run: |
-          sudo ctr --debug image push --user "${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}" ${{ steps.prep.outputs.docker_image }}
+          sudo ctr --debug image push --user "${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }}" ${{ steps.prep.outputs.docker_image }}:${{ steps.prep.outputs.version }}
       -
         name: Output Containerd logs
         if: always()
