@@ -103,6 +103,12 @@ jobs:
 
   github-ghcr-newrepo:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tag:
+          - edge
+          - latest
     steps:
       -
         name: Checkout
@@ -111,16 +117,7 @@ jobs:
         name: Prepare
         id: prep
         run: |
-          DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/test-docker-action-${{ github.run_id }}
-          VERSION=edge
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/v}
-          fi
-          TAGS="${DOCKER_IMAGE}:${VERSION}"
-          if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            TAGS="$TAGS,${DOCKER_IMAGE}:latest"
-          fi
-          echo ::set-output name=tags::${TAGS}
+          echo ::set-output name=docker_image::ghcr.io/${{ github.repository_owner }}/test-docker-action-${{ github.run_id }}
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -145,7 +142,7 @@ jobs:
           file: ./Dockerfile
           #platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.prep.outputs.tags }}
+          tags: ${{ steps.prep.outputs.docker_image }}:${{ matrix.tag }}
 
   dockerhub:
     runs-on: ubuntu-latest
