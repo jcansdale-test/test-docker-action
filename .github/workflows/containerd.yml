@@ -162,7 +162,7 @@ jobs:
           context: .
           file: ./Dockerfile
           #platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x
-          tags: ${{ steps.prep.outputs.docker_image }}
+          tags: ${{ steps.prep.outputs.docker_image }}:edge
           outputs: type=oci,dest=/tmp/image.tar
       -
         name: Import image in Containerd
@@ -175,7 +175,7 @@ jobs:
       -
         name: Push image with Containerd
         run: |
-          sudo ctr --debug image push --user "${{ github.repository_owner }}:${{ secrets.CR_PAT }}" ${{ steps.prep.outputs.docker_image }}:latest
+          sudo ctr --debug image push --user "${{ github.repository_owner }}:${{ secrets.CR_PAT }}" ${{ steps.prep.outputs.docker_image }}:edge
       -
         name: Output Containerd logs
         if: always()
